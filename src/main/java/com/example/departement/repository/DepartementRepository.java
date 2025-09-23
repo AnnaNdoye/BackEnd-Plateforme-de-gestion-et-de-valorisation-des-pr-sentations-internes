@@ -13,14 +13,14 @@ import com.example.departement.entity.Departement;
 public interface DepartementRepository extends JpaRepository<Departement, Long> {
     
     // Recherche par nom (insensible à la casse)
-    List<Departement> findByNomContainingIgnoreCase(String nom);
+    List<Departement> findByNomDepartementContainingIgnoreCase(String nomDepartement);
     
     // Recherche par code (insensible à la casse)
     List<Departement> findByCodeContainingIgnoreCase(String code);
     
     // Recherche globale (nom, code ou description)
     @Query("SELECT d FROM Departement d WHERE " +
-            "LOWER(d.nom) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.nomDepartement) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(d.code) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(d.description) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Departement> searchByKeyword(@Param("keyword") String keyword);
@@ -29,5 +29,5 @@ public interface DepartementRepository extends JpaRepository<Departement, Long> 
     boolean existsByCode(String code);
     
     // Vérifier l'existence par nom (pour éviter les doublons)
-    boolean existsByNom(String nom);
+    boolean existsByNomDepartement(String nomDepartement);
 }

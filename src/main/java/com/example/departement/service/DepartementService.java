@@ -31,38 +31,34 @@ public class DepartementService {
         if (departementRepository.existsByCode(departement.getCode())) {
             throw new RuntimeException("Un département avec ce code existe déjà");
         }
-        
         // Vérifier que le nom n'existe pas déjà
-        if (departementRepository.existsByNom(departement.getNom())) {
+        if (departementRepository.existsByNomDepartement(departement.getNomDepartement())) {
             throw new RuntimeException("Un département avec ce nom existe déjà");
         }
-        
         return departementRepository.save(departement);
     }
     
     // Mettre à jour un département
     public Departement updateDepartement(Long id, Departement departementDetails) {
         Optional<Departement> optionalDepartement = departementRepository.findById(id);
-        
         if (optionalDepartement.isPresent()) {
             Departement departement = optionalDepartement.get();
             
             // Vérifier l'unicité du code (sauf pour le département actuel)
-            if (!departement.getCode().equals(departementDetails.getCode()) 
-                && departementRepository.existsByCode(departementDetails.getCode())) {
+            if (!departement.getCode().equals(departementDetails.getCode()) && 
+                departementRepository.existsByCode(departementDetails.getCode())) {
                 throw new RuntimeException("Un département avec ce code existe déjà");
             }
             
             // Vérifier l'unicité du nom (sauf pour le département actuel)
-            if (!departement.getNom().equals(departementDetails.getNom()) 
-                && departementRepository.existsByNom(departementDetails.getNom())) {
+            if (!departement.getNomDepartement().equals(departementDetails.getNomDepartement()) && 
+                departementRepository.existsByNomDepartement(departementDetails.getNomDepartement())) {
                 throw new RuntimeException("Un département avec ce nom existe déjà");
             }
             
-            departement.setNom(departementDetails.getNom());
+            departement.setNomDepartement(departementDetails.getNomDepartement());
             departement.setCode(departementDetails.getCode());
             departement.setDescription(departementDetails.getDescription());
-            departement.setNombreEmployes(departementDetails.getNombreEmployes());
             
             return departementRepository.save(departement);
         } else {
