@@ -30,6 +30,7 @@ public class DepartementController {
 
     // GET /api/departements - Récupérer tous les départements
     @GetMapping
+    @SuppressWarnings("CallToPrintStackTrace")
     public ResponseEntity<List<Departement>> getAllDepartements() {
         try {
             System.out.println("Appel GET /api/departements");
