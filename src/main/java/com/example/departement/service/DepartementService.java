@@ -11,36 +11,39 @@ import com.example.departement.repository.DepartementRepository;
 
 @Service
 public class DepartementService {
-    
+
     @Autowired
     private DepartementRepository departementRepository;
-    
+
     // Récupérer tous les départements
     public List<Departement> getAllDepartements() {
         return departementRepository.findAll();
     }
-    
+
     // Récupérer un département par ID
     public Optional<Departement> getDepartementById(Long id) {
         return departementRepository.findById(id);
     }
-    
+
     // Créer un nouveau département
     public Departement createDepartement(Departement departement) {
         // Vérifier que le code n'existe pas déjà
         if (departementRepository.existsByCode(departement.getCode())) {
             throw new RuntimeException("Un département avec ce code existe déjà");
         }
+        
         // Vérifier que le nom n'existe pas déjà
         if (departementRepository.existsByNomDepartement(departement.getNomDepartement())) {
             throw new RuntimeException("Un département avec ce nom existe déjà");
         }
+        
         return departementRepository.save(departement);
     }
-    
+
     // Mettre à jour un département
     public Departement updateDepartement(Long id, Departement departementDetails) {
         Optional<Departement> optionalDepartement = departementRepository.findById(id);
+        
         if (optionalDepartement.isPresent()) {
             Departement departement = optionalDepartement.get();
             
@@ -65,7 +68,7 @@ public class DepartementService {
             throw new RuntimeException("Département non trouvé avec l'ID: " + id);
         }
     }
-    
+
     // Supprimer un département
     public void deleteDepartement(Long id) {
         if (departementRepository.existsById(id)) {
@@ -74,12 +77,17 @@ public class DepartementService {
             throw new RuntimeException("Département non trouvé avec l'ID: " + id);
         }
     }
-    
+
     // Rechercher des départements
     public List<Departement> searchDepartements(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllDepartements();
         }
         return departementRepository.searchByKeyword(keyword.trim());
+    }
+    
+    // Méthode de test pour vérifier la connectivité
+    public String test() {
+        return "API Départements fonctionne !";
     }
 }
