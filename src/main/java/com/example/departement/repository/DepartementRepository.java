@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.example.departement.entity.Departement;
 
 @Repository
-public interface DepartementRepository extends JpaRepository<Departement, Long> {
+public interface DepartementRepository extends JpaRepository<Departement, Integer> {
     
     // Recherche par nom (insensible à la casse)
     List<Departement> findByNomDepartementContainingIgnoreCase(String nomDepartement);

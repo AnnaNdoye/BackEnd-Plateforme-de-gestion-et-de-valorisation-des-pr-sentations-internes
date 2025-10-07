@@ -16,7 +16,7 @@ public class Departement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_departement")
-    private Long idDepartement;
+    private Integer idDepartement;
     
     @Column(name = "nom_departement", nullable = false, unique = true)
     @NotBlank(message = "Le nom du département ne peut pas être vide")
@@ -41,11 +41,11 @@ public class Departement {
     }
     
     // Getters et Setters
-    public Long getIdDepartement() {
+    public Integer getIdDepartement() {
         return idDepartement;
     }
-    
-    public void setIdDepartement(Long idDepartement) {
+
+    public void setIdDepartement(Integer idDepartement) {
         this.idDepartement = idDepartement;
     }
     

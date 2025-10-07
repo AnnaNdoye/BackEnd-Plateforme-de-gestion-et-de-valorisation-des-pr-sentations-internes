@@ -21,7 +21,7 @@ public class DepartementService {
     }
 
     // Récupérer un département par ID
-    public Optional<Departement> getDepartementById(Long id) {
+    public Optional<Departement> getDepartementById(Integer id) {
         return departementRepository.findById(id);
     }
 
@@ -41,7 +41,7 @@ public class DepartementService {
     }
 
     // Mettre à jour un département
-    public Departement updateDepartement(Long id, Departement departementDetails) {
+    public Departement updateDepartement(Integer id, Departement departementDetails) {
         Optional<Departement> optionalDepartement = departementRepository.findById(id);
         
         if (optionalDepartement.isPresent()) {
@@ -70,7 +70,7 @@ public class DepartementService {
     }
 
     // Supprimer un département
-    public void deleteDepartement(Long id) {
+    public void deleteDepartement(Integer id) {
         if (departementRepository.existsById(id)) {
             departementRepository.deleteById(id);
         } else {

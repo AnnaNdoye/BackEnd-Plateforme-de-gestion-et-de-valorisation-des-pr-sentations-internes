@@ -46,7 +46,7 @@ public class DepartementController {
 
     // GET /api/departements/{id} - Récupérer un département par ID
     @GetMapping("/{id}")
-    public ResponseEntity<Departement> getDepartementById(@PathVariable Long id) {
+    public ResponseEntity<Departement> getDepartementById(@PathVariable Integer id) {
         try {
             Optional<Departement> departement = departementService.getDepartementById(id);
             return departement.map(ResponseEntity::ok)
@@ -76,7 +76,7 @@ public class DepartementController {
 
     // PUT /api/departements/{id} - Mettre à jour un département
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDepartement(@PathVariable Long id, @Valid @RequestBody Departement departementDetails) {
+    public ResponseEntity<?> updateDepartement(@PathVariable Integer id, @Valid @RequestBody Departement departementDetails) {
         try {
             System.out.println("Mise à jour du département " + id);
             Departement updatedDepartement = departementService.updateDepartement(id, departementDetails);
@@ -93,7 +93,7 @@ public class DepartementController {
 
     // DELETE /api/departements/{id} - Supprimer un département
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDepartement(@PathVariable Long id) {
+    public ResponseEntity<?> deleteDepartement(@PathVariable Integer id) {
         try {
             System.out.println("Suppression du département " + id);
             departementService.deleteDepartement(id);
