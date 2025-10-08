@@ -1,5 +1,7 @@
 package com.example.departement.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import com.example.departement.util.JwtUtils;
 
 @Service
 public class UtilisateurService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UtilisateurService.class);
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
@@ -57,14 +61,21 @@ public class UtilisateurService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        logger.info("Tentative de connexion pour l'email: {}", request.getEmail());
+
         Utilisateur utilisateur = utilisateurRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email ou mot de passe incorrect"));
+                .orElseThrow(() -> {
+                    logger.warn("Utilisateur non trouvé pour l'email: {}", request.getEmail());
+                    return new RuntimeException("Email ou mot de passe incorrect");
+                });
 
         if (!passwordEncoder.matches(request.getMotDePasse(), utilisateur.getMotDePasse())) {
+            logger.warn("Mot de passe incorrect pour l'email: {}", request.getEmail());
             throw new RuntimeException("Email ou mot de passe incorrect");
         }
 
         String token = jwtUtils.generateToken(utilisateur.getEmail());
+        logger.info("Connexion réussie pour l'email: {}", request.getEmail());
 
         return new AuthResponse(
                 token,
