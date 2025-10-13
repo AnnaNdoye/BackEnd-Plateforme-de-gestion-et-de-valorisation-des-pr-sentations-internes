@@ -1,6 +1,6 @@
 package com.example.departement.service;
 
-import java.util.Collections;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -13,7 +13,7 @@ import com.example.departement.entity.Utilisateur;
 import com.example.departement.repository.UtilisateurRepository;
 
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
@@ -21,8 +21,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + email));
 
-        return new User(utilisateur.getEmail(), utilisateur.getMotDePasse(), Collections.emptyList());
+        return new User(
+                utilisateur.getEmail(),
+                utilisateur.getMotDePasse(),
+                new ArrayList<>()
+        );
     }
 }
