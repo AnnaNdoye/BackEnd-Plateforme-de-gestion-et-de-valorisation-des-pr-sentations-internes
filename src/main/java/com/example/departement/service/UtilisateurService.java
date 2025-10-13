@@ -1,8 +1,6 @@
 
 package com.example.departement.service;
 
-import java.time.format.DateTimeFormatter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import com.example.departement.util.JwtUtils;
 public class UtilisateurService {
 
     private static final Logger logger = LoggerFactory.getLogger(UtilisateurService.class);
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
@@ -62,7 +59,7 @@ public class UtilisateurService {
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
                 utilisateur.getMatricule(),
-                utilisateur.getDateInscription().format(FORMATTER)
+                utilisateur.getDateInscription()
         );
     }
 
@@ -91,7 +88,7 @@ public class UtilisateurService {
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
                 utilisateur.getMatricule(),
-                utilisateur.getDateInscription().format(FORMATTER)
+                utilisateur.getDateInscription()
         );
     }
 
@@ -107,7 +104,7 @@ public class UtilisateurService {
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
                 utilisateur.getMatricule(),
-                utilisateur.getDateInscription().format(FORMATTER)
+                utilisateur.getDateInscription()
         );
     }
 
@@ -143,7 +140,7 @@ public class UtilisateurService {
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
                 utilisateur.getMatricule(),
-                utilisateur.getDateInscription().format(FORMATTER)
+                utilisateur.getDateInscription()
         );
     }
 }
