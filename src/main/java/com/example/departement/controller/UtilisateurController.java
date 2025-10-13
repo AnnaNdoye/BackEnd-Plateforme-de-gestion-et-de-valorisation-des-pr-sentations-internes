@@ -1,4 +1,3 @@
-
 package com.example.departement.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.departement.dto.AuthResponse;
 import com.example.departement.dto.LoginRequest;
 import com.example.departement.dto.RegisterRequest;
+import com.example.departement.dto.UpdateProfileRequest;
 import com.example.departement.service.UtilisateurService;
 
 import jakarta.validation.Valid;
@@ -64,6 +65,34 @@ public class UtilisateurController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"message\":\"Erreur interne du serveur\"}");
+        }
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            AuthResponse response = utilisateurService.updateProfile(email, request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\":\"Erreur interne du serveur\"}");
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        try {
+            // Pour JWT, la déconnexion est principalement côté client
+            // Ici, on peut simplement retourner un succès
+            // Si on voulait invalider le token côté serveur, on pourrait utiliser une blacklist
+            return ResponseEntity.ok("{\"message\":\"Déconnexion réussie\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\":\"Erreur lors de la déconnexion\"}");
         }
     }
 }

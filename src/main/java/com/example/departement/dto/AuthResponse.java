@@ -8,8 +8,9 @@ public class AuthResponse {
     private String email;
     private String poste;
     private String matricule;
+    private String dateInscription;
 
-    public AuthResponse(String token, Integer idUtilisateur, String nom, String prenom, String email, String poste, String matricule) {
+    public AuthResponse(String token, Integer idUtilisateur, String nom, String prenom, String email, String poste, String matricule, String dateInscription) {
         this.token = token;
         this.idUtilisateur = idUtilisateur;
         this.nom = nom;
@@ -17,6 +18,7 @@ public class AuthResponse {
         this.email = email;
         this.poste = poste;
         this.matricule = matricule;
+        this.dateInscription = dateInscription;
     }
 
     // Getters and setters
@@ -40,4 +42,7 @@ public class AuthResponse {
 
     public String getMatricule() { return matricule; }
     public void setMatricule(String matricule) { this.matricule = matricule; }
+
+    public String getDateInscription() { return dateInscription; }
+    public void setDateInscription(String dateInscription) { this.dateInscription = dateInscription; }
 }

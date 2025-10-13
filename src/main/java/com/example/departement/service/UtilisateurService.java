@@ -1,6 +1,8 @@
 
 package com.example.departement.service;
 
+import java.time.format.DateTimeFormatter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.example.departement.dto.AuthResponse;
 import com.example.departement.dto.LoginRequest;
 import com.example.departement.dto.RegisterRequest;
+import com.example.departement.dto.UpdateProfileRequest;
 import com.example.departement.entity.Utilisateur;
 import com.example.departement.repository.UtilisateurRepository;
 import com.example.departement.util.JwtUtils;
@@ -18,6 +21,7 @@ import com.example.departement.util.JwtUtils;
 public class UtilisateurService {
 
     private static final Logger logger = LoggerFactory.getLogger(UtilisateurService.class);
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
@@ -57,7 +61,8 @@ public class UtilisateurService {
                 utilisateur.getPrenom(),
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
-                utilisateur.getMatricule()
+                utilisateur.getMatricule(),
+                utilisateur.getDateInscription().format(FORMATTER)
         );
     }
 
@@ -85,7 +90,8 @@ public class UtilisateurService {
                 utilisateur.getPrenom(),
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
-                utilisateur.getMatricule()
+                utilisateur.getMatricule(),
+                utilisateur.getDateInscription().format(FORMATTER)
         );
     }
 
@@ -100,7 +106,44 @@ public class UtilisateurService {
                 utilisateur.getPrenom(),
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
-                utilisateur.getMatricule()
+                utilisateur.getMatricule(),
+                utilisateur.getDateInscription().format(FORMATTER)
+        );
+    }
+
+    public AuthResponse updateProfile(String email, UpdateProfileRequest request) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        // Vérifier si l'email est changé et s'il est déjà pris
+        if (!utilisateur.getEmail().equals(request.getEmail()) && utilisateurRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Un utilisateur avec cet email existe déjà");
+        }
+
+        // Vérifier si le matricule est changé et s'il est déjà pris
+        if (!utilisateur.getMatricule().equals(request.getMatricule()) && utilisateurRepository.existsByMatricule(request.getMatricule())) {
+            throw new RuntimeException("Un utilisateur avec ce matricule existe déjà");
+        }
+
+        // Mettre à jour les champs
+        utilisateur.setNom(request.getNom());
+        utilisateur.setPrenom(request.getPrenom());
+        utilisateur.setEmail(request.getEmail());
+        utilisateur.setPoste(request.getPoste());
+        utilisateur.setMatricule(request.getMatricule());
+        utilisateur.setPhotoDeProfil(request.getPhotoDeProfil());
+
+        utilisateur = utilisateurRepository.save(utilisateur);
+
+        return new AuthResponse(
+                null, // No token for profile update
+                utilisateur.getIdUtilisateur(),
+                utilisateur.getNom(),
+                utilisateur.getPrenom(),
+                utilisateur.getEmail(),
+                utilisateur.getPoste(),
+                utilisateur.getMatricule(),
+                utilisateur.getDateInscription().format(FORMATTER)
         );
     }
 }
