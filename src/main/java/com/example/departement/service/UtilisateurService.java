@@ -87,4 +87,19 @@ public class UtilisateurService {
                 utilisateur.getMatricule()
         );
     }
+
+    public AuthResponse getProfile(String email) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        return new AuthResponse(
+                null, // No token for profile fetch
+                utilisateur.getIdUtilisateur(),
+                utilisateur.getNom(),
+                utilisateur.getPrenom(),
+                utilisateur.getEmail(),
+                utilisateur.getPoste(),
+                utilisateur.getMatricule()
+        );
+    }
 }
