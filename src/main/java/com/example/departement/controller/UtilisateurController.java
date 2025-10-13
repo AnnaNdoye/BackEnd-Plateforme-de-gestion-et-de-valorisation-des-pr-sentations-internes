@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.departement.dto.AuthResponse;
 import com.example.departement.dto.LoginRequest;
@@ -68,12 +70,18 @@ public class UtilisateurController {
         }
     }
 
-    @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
+    @PutMapping(value = "/profile", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> updateProfile(
+            @RequestParam("nom") String nom,
+            @RequestParam("prenom") String prenom,
+            @RequestParam("email") String email,
+            @RequestParam("poste") String poste,
+            @RequestParam("matricule") String matricule,
+            @RequestParam(value = "photo", required = false) MultipartFile photo) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = authentication.getName();
-            AuthResponse response = utilisateurService.updateProfile(email, request);
+            String userEmail = authentication.getName();
+            AuthResponse response = utilisateurService.updateProfile(userEmail, nom, prenom, email, poste, matricule, photo);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");

@@ -10,9 +10,10 @@ public class AuthResponse {
     private String email;
     private String poste;
     private String matricule;
+    private String photoDeProfil;
     private LocalDateTime dateInscription;
 
-    public AuthResponse(String token, Integer idUtilisateur, String nom, String prenom, String email, String poste, String matricule, LocalDateTime dateInscription) {
+    public AuthResponse(String token, Integer idUtilisateur, String nom, String prenom, String email, String poste, String matricule, String photoDeProfil, LocalDateTime dateInscription) {
         this.token = token;
         this.idUtilisateur = idUtilisateur;
         this.nom = nom;
@@ -20,6 +21,7 @@ public class AuthResponse {
         this.email = email;
         this.poste = poste;
         this.matricule = matricule;
+        this.photoDeProfil = photoDeProfil;
         this.dateInscription = dateInscription;
     }
 
@@ -44,6 +46,9 @@ public class AuthResponse {
 
     public String getMatricule() { return matricule; }
     public void setMatricule(String matricule) { this.matricule = matricule; }
+
+    public String getPhotoDeProfil() { return photoDeProfil; }
+    public void setPhotoDeProfil(String photoDeProfil) { this.photoDeProfil = photoDeProfil; }
 
     public LocalDateTime getDateInscription() { return dateInscription; }
     public void setDateInscription(LocalDateTime dateInscription) { this.dateInscription = dateInscription; }

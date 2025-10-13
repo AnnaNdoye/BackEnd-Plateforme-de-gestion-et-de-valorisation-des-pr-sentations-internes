@@ -4,6 +4,7 @@ package com.example.departement.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,9 @@ import com.example.departement.util.JwtUtils;
 public class UtilisateurService {
 
     private static final Logger logger = LoggerFactory.getLogger(UtilisateurService.class);
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
@@ -59,6 +63,7 @@ public class UtilisateurService {
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
                 utilisateur.getMatricule(),
+                utilisateur.getPhotoDeProfil(),
                 utilisateur.getDateInscription()
         );
     }
@@ -88,6 +93,7 @@ public class UtilisateurService {
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
                 utilisateur.getMatricule(),
+                utilisateur.getPhotoDeProfil(),
                 utilisateur.getDateInscription()
         );
     }
@@ -104,31 +110,57 @@ public class UtilisateurService {
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
                 utilisateur.getMatricule(),
+                utilisateur.getPhotoDeProfil(),
                 utilisateur.getDateInscription()
         );
     }
 
-    public AuthResponse updateProfile(String email, UpdateProfileRequest request) {
+    public AuthResponse updateProfile(String email, String nom, String prenom, String userEmail, String poste, String matricule, MultipartFile photo) {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         // Vérifier si l'email est changé et s'il est déjà pris
-        if (!utilisateur.getEmail().equals(request.getEmail()) && utilisateurRepository.existsByEmail(request.getEmail())) {
+        if (!utilisateur.getEmail().equals(userEmail) && utilisateurRepository.existsByEmail(userEmail)) {
             throw new RuntimeException("Un utilisateur avec cet email existe déjà");
         }
 
         // Vérifier si le matricule est changé et s'il est déjà pris
-        if (!utilisateur.getMatricule().equals(request.getMatricule()) && utilisateurRepository.existsByMatricule(request.getMatricule())) {
+        if (!utilisateur.getMatricule().equals(matricule) && utilisateurRepository.existsByMatricule(matricule)) {
             throw new RuntimeException("Un utilisateur avec ce matricule existe déjà");
         }
 
+        // Gérer l'upload de la photo
+        String photoPath = null;
+        if (photo != null && !photo.isEmpty()) {
+            try {
+                // Créer le répertoire s'il n'existe pas
+                Path uploadPath = Paths.get(uploadDir);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                // Générer un nom de fichier unique
+                String fileName = UUID.randomUUID().toString() + "_" + photo.getOriginalFilename();
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Stocker le chemin relatif
+                photoPath = "/uploads/" + fileName;
+            } catch (IOException e) {
+                logger.error("Erreur lors de l'upload de la photo: {}", e.getMessage());
+                throw new RuntimeException("Erreur lors de l'upload de la photo");
+            }
+        }
+
         // Mettre à jour les champs
-        utilisateur.setNom(request.getNom());
-        utilisateur.setPrenom(request.getPrenom());
-        utilisateur.setEmail(request.getEmail());
-        utilisateur.setPoste(request.getPoste());
-        utilisateur.setMatricule(request.getMatricule());
-        utilisateur.setPhotoDeProfil(request.getPhotoDeProfil());
+        utilisateur.setNom(nom);
+        utilisateur.setPrenom(prenom);
+        utilisateur.setEmail(userEmail);
+        utilisateur.setPoste(poste);
+        utilisateur.setMatricule(matricule);
+        if (photoPath != null) {
+            utilisateur.setPhotoDeProfil(photoPath);
+        }
 
         utilisateur = utilisateurRepository.save(utilisateur);
 
@@ -140,6 +172,7 @@ public class UtilisateurService {
                 utilisateur.getEmail(),
                 utilisateur.getPoste(),
                 utilisateur.getMatricule(),
+                utilisateur.getPhotoDeProfil(),
                 utilisateur.getDateInscription()
         );
     }
