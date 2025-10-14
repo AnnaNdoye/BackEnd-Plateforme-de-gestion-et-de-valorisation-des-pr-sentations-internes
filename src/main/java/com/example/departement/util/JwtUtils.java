@@ -3,7 +3,6 @@ package com.example.departement.util;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import jakarta.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class JwtUtils {
@@ -42,7 +42,7 @@ public class JwtUtils {
     public String generateToken(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
-        
+
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(now)
@@ -61,6 +61,23 @@ public class JwtUtils {
             return claims.getSubject();
         } catch (Exception e) {
             System.err.println("Error extracting username from token: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public Integer getUserIdFromJwtToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            String email = claims.getSubject();
+            // Pour obtenir l'ID, on doit faire une requête DB, mais pour simplifier, on utilise le service
+            // Ici, on retourne null et on gère différemment dans le controller
+            return null; // TODO: Implémenter correctement
+        } catch (Exception e) {
+            System.err.println("Error extracting user ID from token: " + e.getMessage());
             return null;
         }
     }

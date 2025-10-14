@@ -35,6 +35,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()  // Permettre l'accès aux fichiers uploadés
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
