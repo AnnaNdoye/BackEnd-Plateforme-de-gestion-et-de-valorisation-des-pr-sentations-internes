@@ -1,5 +1,11 @@
-
 package com.example.departement.service;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,21 +13,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.departement.dto.AuthResponse;
 import com.example.departement.dto.LoginRequest;
 import com.example.departement.dto.RegisterRequest;
-import com.example.departement.dto.UpdateProfileRequest;
 import com.example.departement.entity.Utilisateur;
 import com.example.departement.repository.UtilisateurRepository;
 import com.example.departement.util.JwtUtils;
 
 @Service
 public class UtilisateurService {
-
     private static final Logger logger = LoggerFactory.getLogger(UtilisateurService.class);
 
-    @Value("${app.upload.dir}")
+    @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
     @Autowired
@@ -37,45 +42,45 @@ public class UtilisateurService {
         if (utilisateurRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Un utilisateur avec cet email existe déjà");
         }
+
         if (utilisateurRepository.existsByMatricule(request.getMatricule())) {
             throw new RuntimeException("Un utilisateur avec ce matricule existe déjà");
         }
 
         Utilisateur utilisateur = new Utilisateur(
-                request.getNom(),
-                request.getPrenom(),
-                request.getEmail(),
-                null, // photoDeProfil
-                request.getPoste(),
-                request.getMatricule(),
-                passwordEncoder.encode(request.getMotDePasse())
+            request.getNom(),
+            request.getPrenom(),
+            request.getEmail(),
+            null,
+            request.getPoste(),
+            request.getMatricule(),
+            passwordEncoder.encode(request.getMotDePasse())
         );
 
         utilisateur = utilisateurRepository.save(utilisateur);
-
         String token = jwtUtils.generateToken(utilisateur.getEmail());
 
         return new AuthResponse(
-                token,
-                utilisateur.getIdUtilisateur(),
-                utilisateur.getNom(),
-                utilisateur.getPrenom(),
-                utilisateur.getEmail(),
-                utilisateur.getPoste(),
-                utilisateur.getMatricule(),
-                utilisateur.getPhotoDeProfil(),
-                utilisateur.getDateInscription()
+            token,
+            utilisateur.getIdUtilisateur(),
+            utilisateur.getNom(),
+            utilisateur.getPrenom(),
+            utilisateur.getEmail(),
+            utilisateur.getPoste(),
+            utilisateur.getMatricule(),
+            utilisateur.getPhotoDeProfil(),
+            utilisateur.getDateInscription()
         );
     }
 
     public AuthResponse login(LoginRequest request) {
         logger.info("Tentative de connexion pour l'email: {}", request.getEmail());
-
+        
         Utilisateur utilisateur = utilisateurRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> {
-                    logger.warn("Utilisateur non trouvé pour l'email: {}", request.getEmail());
-                    return new RuntimeException("Email ou mot de passe incorrect");
-                });
+            .orElseThrow(() -> {
+                logger.warn("Utilisateur non trouvé pour l'email: {}", request.getEmail());
+                return new RuntimeException("Email ou mot de passe incorrect");
+            });
 
         if (!passwordEncoder.matches(request.getMotDePasse(), utilisateur.getMotDePasse())) {
             logger.warn("Mot de passe incorrect pour l'email: {}", request.getEmail());
@@ -86,66 +91,68 @@ public class UtilisateurService {
         logger.info("Connexion réussie pour l'email: {}", request.getEmail());
 
         return new AuthResponse(
-                token,
-                utilisateur.getIdUtilisateur(),
-                utilisateur.getNom(),
-                utilisateur.getPrenom(),
-                utilisateur.getEmail(),
-                utilisateur.getPoste(),
-                utilisateur.getMatricule(),
-                utilisateur.getPhotoDeProfil(),
-                utilisateur.getDateInscription()
+            token,
+            utilisateur.getIdUtilisateur(),
+            utilisateur.getNom(),
+            utilisateur.getPrenom(),
+            utilisateur.getEmail(),
+            utilisateur.getPoste(),
+            utilisateur.getMatricule(),
+            utilisateur.getPhotoDeProfil(),
+            utilisateur.getDateInscription()
         );
     }
 
     public AuthResponse getProfile(String email) {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         return new AuthResponse(
-                null, // No token for profile fetch
-                utilisateur.getIdUtilisateur(),
-                utilisateur.getNom(),
-                utilisateur.getPrenom(),
-                utilisateur.getEmail(),
-                utilisateur.getPoste(),
-                utilisateur.getMatricule(),
-                utilisateur.getPhotoDeProfil(),
-                utilisateur.getDateInscription()
+            null,
+            utilisateur.getIdUtilisateur(),
+            utilisateur.getNom(),
+            utilisateur.getPrenom(),
+            utilisateur.getEmail(),
+            utilisateur.getPoste(),
+            utilisateur.getMatricule(),
+            utilisateur.getPhotoDeProfil(),
+            utilisateur.getDateInscription()
         );
     }
 
-    public AuthResponse updateProfile(String email, String nom, String prenom, String userEmail, String poste, String matricule, MultipartFile photo) {
-        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    public AuthResponse updateProfile(String currentEmail, String nom, String prenom, 
+                                     String newEmail, String poste, String matricule, 
+                                     MultipartFile photo) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(currentEmail)
+            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         // Vérifier si l'email est changé et s'il est déjà pris
-        if (!utilisateur.getEmail().equals(userEmail) && utilisateurRepository.existsByEmail(userEmail)) {
+        if (!utilisateur.getEmail().equals(newEmail) && 
+            utilisateurRepository.existsByEmail(newEmail)) {
             throw new RuntimeException("Un utilisateur avec cet email existe déjà");
         }
 
         // Vérifier si le matricule est changé et s'il est déjà pris
-        if (!utilisateur.getMatricule().equals(matricule) && utilisateurRepository.existsByMatricule(matricule)) {
+        if (!utilisateur.getMatricule().equals(matricule) && 
+            utilisateurRepository.existsByMatricule(matricule)) {
             throw new RuntimeException("Un utilisateur avec ce matricule existe déjà");
         }
 
         // Gérer l'upload de la photo
-        String photoPath = null;
         if (photo != null && !photo.isEmpty()) {
             try {
-                // Créer le répertoire s'il n'existe pas
                 Path uploadPath = Paths.get(uploadDir);
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
 
-                // Générer un nom de fichier unique
-                String fileName = UUID.randomUUID().toString() + "_" + photo.getOriginalFilename();
+                String fileName = UUID.randomUUID().toString() + "_" + 
+                                photo.getOriginalFilename();
                 Path filePath = uploadPath.resolve(fileName);
-                Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(photo.getInputStream(), filePath, 
+                          StandardCopyOption.REPLACE_EXISTING);
 
-                // Stocker le chemin relatif
-                photoPath = "/uploads/" + fileName;
+                utilisateur.setPhotoDeProfil("/uploads/" + fileName);
             } catch (IOException e) {
                 logger.error("Erreur lors de l'upload de la photo: {}", e.getMessage());
                 throw new RuntimeException("Erreur lors de l'upload de la photo");
@@ -155,25 +162,37 @@ public class UtilisateurService {
         // Mettre à jour les champs
         utilisateur.setNom(nom);
         utilisateur.setPrenom(prenom);
-        utilisateur.setEmail(userEmail);
+        utilisateur.setEmail(newEmail);
         utilisateur.setPoste(poste);
         utilisateur.setMatricule(matricule);
-        if (photoPath != null) {
-            utilisateur.setPhotoDeProfil(photoPath);
-        }
 
         utilisateur = utilisateurRepository.save(utilisateur);
 
         return new AuthResponse(
-                null, // No token for profile update
-                utilisateur.getIdUtilisateur(),
-                utilisateur.getNom(),
-                utilisateur.getPrenom(),
-                utilisateur.getEmail(),
-                utilisateur.getPoste(),
-                utilisateur.getMatricule(),
-                utilisateur.getPhotoDeProfil(),
-                utilisateur.getDateInscription()
+            null,
+            utilisateur.getIdUtilisateur(),
+            utilisateur.getNom(),
+            utilisateur.getPrenom(),
+            utilisateur.getEmail(),
+            utilisateur.getPoste(),
+            utilisateur.getMatricule(),
+            utilisateur.getPhotoDeProfil(),
+            utilisateur.getDateInscription()
         );
+    }
+
+    public void requestPasswordReset(String email) {
+        logger.info("Demande de réinitialisation de mot de passe pour l'email: {}", email);
+
+        // Vérifier si l'utilisateur existe
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+            .orElseThrow(() -> {
+                logger.warn("Utilisateur non trouvé pour la réinitialisation: {}", email);
+                return new RuntimeException("Utilisateur non trouvé");
+            });
+
+        // TODO: Générer un token de réinitialisation et envoyer un email
+        // Pour l'instant, on log seulement
+        logger.info("Réinitialisation de mot de passe demandée pour l'utilisateur: {}", utilisateur.getEmail());
     }
 }

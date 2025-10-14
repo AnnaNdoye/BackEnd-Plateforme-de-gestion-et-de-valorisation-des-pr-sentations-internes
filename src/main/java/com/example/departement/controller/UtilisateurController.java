@@ -21,6 +21,7 @@ import com.example.departement.dto.UpdateProfileRequest;
 import com.example.departement.service.UtilisateurService;
 
 import jakarta.validation.Valid;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -101,6 +102,23 @@ public class UtilisateurController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"message\":\"Erreur lors de la déconnexion\"}");
+        }
+    }
+
+    @PostMapping("/request-password-reset")
+    public ResponseEntity<?> requestPasswordReset(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("{\"message\":\"Email requis\"}");
+            }
+            utilisateurService.requestPasswordReset(email);
+            return ResponseEntity.ok("{\"message\":\"Demande de réinitialisation envoyée\"}");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("{\"message\":\"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\":\"Erreur interne du serveur\"}");
         }
     }
 }
