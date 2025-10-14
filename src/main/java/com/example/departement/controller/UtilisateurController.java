@@ -1,5 +1,7 @@
 package com.example.departement.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.departement.dto.AuthResponse;
 import com.example.departement.dto.LoginRequest;
 import com.example.departement.dto.RegisterRequest;
-import com.example.departement.dto.UpdateProfileRequest;
 import com.example.departement.service.UtilisateurService;
 
 import jakarta.validation.Valid;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")

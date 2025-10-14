@@ -18,9 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.departement.dto.AuthResponse;
 import com.example.departement.dto.LoginRequest;
 import com.example.departement.dto.RegisterRequest;
-import com.example.departement.entity.Departement;
 import com.example.departement.entity.Utilisateur;
-import com.example.departement.repository.DepartementRepository;
 import com.example.departement.repository.UtilisateurRepository;
 import com.example.departement.util.JwtUtils;
 
@@ -33,9 +31,6 @@ public class UtilisateurService {
 
     @Autowired
     private UtilisateurRepository utilisateurRepository;
-
-    @Autowired
-    private DepartementRepository departementRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -52,24 +47,13 @@ public class UtilisateurService {
             throw new RuntimeException("Un utilisateur avec ce matricule existe déjà");
         }
 
-        // Vérifier si le département existe
-        Departement departement = null;
-        if (request.getIdDepartement() != null) {
-            departement = departementRepository.findById(request.getIdDepartement())
-                .orElseThrow(() -> new RuntimeException("Département non trouvé"));
-        }
-
-        Utilisateur utilisateur = new Utilisateur(
-            request.getNom(),
-            request.getPrenom(),
-            request.getEmail(),
-            null,
-            request.getPoste(),
-            request.getMatricule(),
-            passwordEncoder.encode(request.getMotDePasse())
-        );
-
-        utilisateur.setDepartement(departement);
+        Utilisateur utilisateur = new Utilisateur();
+        utilisateur.setNom(request.getNom());
+        utilisateur.setPrenom(request.getPrenom());
+        utilisateur.setEmail(request.getEmail());
+        utilisateur.setPoste(request.getPoste());
+        utilisateur.setMatricule(request.getMatricule());
+        utilisateur.setMotDePasse(passwordEncoder.encode(request.getMotDePasse()));
         utilisateur = utilisateurRepository.save(utilisateur);
         String token = jwtUtils.generateToken(utilisateur.getEmail());
 
@@ -204,8 +188,7 @@ public class UtilisateurService {
                 return new RuntimeException("Utilisateur non trouvé");
             });
 
-        // TODO: Générer un token de réinitialisation et envoyer un email
-        // Pour l'instant, on log seulement
+
         logger.info("Réinitialisation de mot de passe demandée pour l'utilisateur: {}", utilisateur.getEmail());
     }
 }

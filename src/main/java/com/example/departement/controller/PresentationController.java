@@ -3,12 +3,13 @@ package com.example.departement.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +27,7 @@ import com.example.departement.util.JwtUtils;
 
 @RestController
 @RequestMapping("/api/presentations")
-@PreAuthorize("hasRole('USER')")
+@CrossOrigin(origins = "*")
 public class PresentationController {
 
     @Autowired
@@ -42,9 +43,9 @@ public class PresentationController {
     @PostMapping("/create")
     public ResponseEntity<?> createPresentation(
             @RequestParam("idUtilisateur") Integer idUtilisateur,
-            @RequestParam("datePresentation") String datePresentationStr,
-            @RequestParam("heureDebut") String heureDebutStr,
-            @RequestParam("heureFin") String heureFinStr,
+            @RequestParam("datePresentation") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate datePresentation,
+            @RequestParam("heureDebut") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime heureDebut,
+            @RequestParam("heureFin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime heureFin,
             @RequestParam("sujet") String sujet,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("statut") Presentation.StatutPresentation statut,
@@ -52,54 +53,48 @@ public class PresentationController {
             @RequestHeader("Authorization") String token) {
 
         try {
-            // Extraire l'email utilisateur du token
             String jwtToken = token.replace("Bearer ", "");
             String email = jwtUtils.getUsernameFromToken(jwtToken);
-            Integer currentUserId = utilisateurRepository.findByEmail(email).get().getIdUtilisateur();
+            Integer currentUserId = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"))
+                .getIdUtilisateur();
 
-            // Vérifier que l'utilisateur crée pour lui-même
             if (!currentUserId.equals(idUtilisateur)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accès non autorisé");
             }
 
-            LocalDate datePresentation = LocalDate.parse(datePresentationStr);
-            LocalDateTime heureDebut = LocalDateTime.parse(heureDebutStr);
-            LocalDateTime heureFin = LocalDateTime.parse(heureFinStr);
-
-            Presentation presentation = presentationService.createPresentation(idUtilisateur, datePresentation, heureDebut, heureFin, sujet, description, statut, fichiers);
-            return ResponseEntity.ok(presentation);
+            Presentation presentation = presentationService.createPresentation(
+                idUtilisateur, datePresentation, heureDebut, heureFin, 
+                sujet, description, statut, fichiers);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(presentation);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erreur lors de la création: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
         }
     }
 
     // Obtenir toutes les présentations
     @GetMapping("/all")
     public ResponseEntity<List<Presentation>> getAllPresentations() {
-        List<Presentation> presentations = presentationService.getAllPresentations();
-        return ResponseEntity.ok(presentations);
+        try {
+            List<Presentation> presentations = presentationService.getAllPresentations();
+            return ResponseEntity.ok(presentations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // Obtenir une présentation par ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPresentationById(@PathVariable Integer id, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getPresentationById(@PathVariable Integer id) {
         try {
-            String jwtToken = token.replace("Bearer ", "");
-            String email = jwtUtils.getUsernameFromToken(jwtToken);
-            Integer currentUserId = utilisateurRepository.findByEmail(email).get().getIdUtilisateur();
-
-            Optional<Presentation> presentation = presentationService.getPresentationById(id);
-            if (presentation.isPresent()) {
-                // Vérifier que l'utilisateur est le propriétaire
-                if (!presentation.get().getUtilisateur().getIdUtilisateur().equals(currentUserId)) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accès non autorisé");
-                }
-                return ResponseEntity.ok(presentation.get());
-            } else {
-                return ResponseEntity.notFound().build();
-            }
+            return presentationService.getPresentationById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erreur: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -109,12 +104,40 @@ public class PresentationController {
         try {
             String jwtToken = token.replace("Bearer ", "");
             String email = jwtUtils.getUsernameFromToken(jwtToken);
-            Integer currentUserId = utilisateurRepository.findByEmail(email).get().getIdUtilisateur();
+            Integer currentUserId = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"))
+                .getIdUtilisateur();
 
             List<Presentation> presentations = presentationService.getPresentationsByUtilisateur(currentUserId);
             return ResponseEntity.ok(presentations);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erreur: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Obtenir les présentations par statut
+    @GetMapping("/statut/{statut}")
+    public ResponseEntity<List<Presentation>> getPresentationsByStatut(
+            @PathVariable Presentation.StatutPresentation statut) {
+        try {
+            List<Presentation> presentations = presentationService.getPresentationsByStatut(statut);
+            return ResponseEntity.ok(presentations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Obtenir les présentations par période
+    @GetMapping("/period")
+    public ResponseEntity<List<Presentation>> getPresentationsByPeriod(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        try {
+            List<Presentation> presentations = presentationService.getPresentationsByPeriod(startDate, endDate);
+            return ResponseEntity.ok(presentations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -123,9 +146,9 @@ public class PresentationController {
     public ResponseEntity<?> updatePresentation(
             @PathVariable Integer id,
             @RequestParam("idUtilisateur") Integer idUtilisateur,
-            @RequestParam("datePresentation") String datePresentationStr,
-            @RequestParam("heureDebut") String heureDebutStr,
-            @RequestParam("heureFin") String heureFinStr,
+            @RequestParam("datePresentation") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate datePresentation,
+            @RequestParam("heureDebut") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime heureDebut,
+            @RequestParam("heureFin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime heureFin,
             @RequestParam("sujet") String sujet,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("statut") Presentation.StatutPresentation statut,
@@ -135,42 +158,65 @@ public class PresentationController {
         try {
             String jwtToken = token.replace("Bearer ", "");
             String email = jwtUtils.getUsernameFromToken(jwtToken);
-            Integer currentUserId = utilisateurRepository.findByEmail(email).get().getIdUtilisateur();
+            Integer currentUserId = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"))
+                .getIdUtilisateur();
 
             if (!currentUserId.equals(idUtilisateur)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accès non autorisé");
             }
 
-            LocalDate datePresentation = LocalDate.parse(datePresentationStr);
-            LocalDateTime heureDebut = LocalDateTime.parse(heureDebutStr);
-            LocalDateTime heureFin = LocalDateTime.parse(heureFinStr);
-
-            Presentation presentation = presentationService.updatePresentation(id, idUtilisateur, datePresentation, heureDebut, heureFin, sujet, description, statut, fichiers);
+            Presentation presentation = presentationService.updatePresentation(
+                id, idUtilisateur, datePresentation, heureDebut, heureFin, 
+                sujet, description, statut, fichiers);
+            
             return ResponseEntity.ok(presentation);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erreur lors de la mise à jour: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
         }
     }
 
     // Supprimer une présentation
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePresentation(@PathVariable Integer id, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> deletePresentation(
+            @PathVariable Integer id, 
+            @RequestHeader("Authorization") String token) {
         try {
             String jwtToken = token.replace("Bearer ", "");
             String email = jwtUtils.getUsernameFromToken(jwtToken);
-            Integer currentUserId = utilisateurRepository.findByEmail(email).get().getIdUtilisateur();
+            Integer currentUserId = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"))
+                .getIdUtilisateur();
 
             presentationService.deletePresentation(id, currentUserId);
-            return ResponseEntity.ok("Présentation supprimée avec succès");
+            return ResponseEntity.ok(Map.of("message", "Présentation supprimée avec succès"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erreur lors de la suppression: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
         }
     }
 
     // Rechercher des présentations
     @GetMapping("/search")
     public ResponseEntity<List<Presentation>> searchPresentations(@RequestParam("term") String term) {
-        List<Presentation> presentations = presentationService.searchPresentations(term);
-        return ResponseEntity.ok(presentations);
+        try {
+            List<Presentation> presentations = presentationService.searchPresentations(term);
+            return ResponseEntity.ok(presentations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Obtenir les statistiques d'une présentation
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<?> getPresentationStats(@PathVariable Integer id) {
+        try {
+            Map<String, Object> stats = presentationService.getPresentationStats(id);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+        }
     }
 }

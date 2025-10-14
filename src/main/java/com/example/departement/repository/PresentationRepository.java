@@ -28,4 +28,6 @@ public interface PresentationRepository extends JpaRepository<Presentation, Inte
 
     // Trouver les présentations d'un utilisateur par statut
     List<Presentation> findByUtilisateurIdUtilisateurAndStatut(Integer idUtilisateur, Presentation.StatutPresentation statut);
+
+    List<Presentation> findAllByOrderByDatePresentationDesc();
 }
