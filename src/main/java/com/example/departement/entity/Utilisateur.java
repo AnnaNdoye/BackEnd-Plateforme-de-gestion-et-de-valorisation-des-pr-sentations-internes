@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -46,6 +48,10 @@ public class Utilisateur {
     @NotBlank(message = "Le matricule est obligatoire")
     @Size(min = 1, max = 100, message = "Le matricule doit contenir entre 1 et 100 caractères")
     private String matricule;
+
+    @ManyToOne
+    @JoinColumn(name = "id_departement")
+    private Departement departement;
 
     @Column(name = "mot_de_passe", nullable = false)
     @NotBlank(message = "Le mot de passe est obligatoire")
@@ -89,6 +95,9 @@ public class Utilisateur {
 
     public String getMatricule() { return matricule; }
     public void setMatricule(String matricule) { this.matricule = matricule; }
+
+    public Departement getDepartement() { return departement; }
+    public void setDepartement(Departement departement) { this.departement = departement; }
 
     public String getMotDePasse() { return motDePasse; }
     public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }

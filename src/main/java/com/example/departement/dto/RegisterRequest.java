@@ -24,6 +24,8 @@ public class RegisterRequest {
     @Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")
     private String motDePasse;
 
+    private Integer idDepartement;
+
     // Getters and setters
     public String getNom() { return nom; }
     public void setNom(String nom) { this.nom = nom; }
@@ -42,4 +44,7 @@ public class RegisterRequest {
 
     public String getMotDePasse() { return motDePasse; }
     public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
+
+    public Integer getIdDepartement() { return idDepartement; }
+    public void setIdDepartement(Integer idDepartement) { this.idDepartement = idDepartement; }
 }
