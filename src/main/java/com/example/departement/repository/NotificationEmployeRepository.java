@@ -14,10 +14,18 @@ import com.example.departement.entity.NotificationEmployeId;
 public interface NotificationEmployeRepository extends JpaRepository<NotificationEmploye, NotificationEmployeId> {
     List<NotificationEmploye> findByIdUtilisateur(Integer idUtilisateur);
     
-    @Query("SELECT ne FROM NotificationEmploye ne WHERE ne.idUtilisateur = :idUtilisateur " +
+    @Query("SELECT ne FROM NotificationEmploye ne " +
+           "LEFT JOIN FETCH ne.utilisateur u " +
+           "LEFT JOIN FETCH u.presentations " +
+           "LEFT JOIN FETCH ne.notification n " +
+           "WHERE ne.idUtilisateur = :idUtilisateur " +
            "ORDER BY ne.notification.dateDeReception DESC")
     List<NotificationEmploye> findByIdUtilisateurOrderByDateDesc(@Param("idUtilisateur") Integer idUtilisateur);
-    
-    @Query("SELECT ne FROM NotificationEmploye ne WHERE ne.idUtilisateur = :idUtilisateur AND ne.lue = false")
+
+    @Query("SELECT ne FROM NotificationEmploye ne " +
+           "LEFT JOIN FETCH ne.utilisateur u " +
+           "LEFT JOIN FETCH u.presentations " +
+           "LEFT JOIN FETCH ne.notification n " +
+           "WHERE ne.idUtilisateur = :idUtilisateur AND ne.lue = false")
     List<NotificationEmploye> findUnreadByIdUtilisateur(@Param("idUtilisateur") Integer idUtilisateur);
 }
