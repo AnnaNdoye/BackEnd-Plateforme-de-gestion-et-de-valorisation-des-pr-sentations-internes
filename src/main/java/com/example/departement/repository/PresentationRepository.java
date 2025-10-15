@@ -22,6 +22,10 @@ public interface PresentationRepository extends JpaRepository<Presentation, Inte
     // Trouver les présentations entre deux dates
     List<Presentation> findByDatePresentationBetween(LocalDate startDate, LocalDate endDate);
 
+    // Trouver les présentations entre deux dates avec documents et votes (pour éviter LazyInitializationException)
+    @Query("SELECT p FROM Presentation p LEFT JOIN FETCH p.documents LEFT JOIN FETCH p.votes WHERE p.datePresentation BETWEEN :startDate AND :endDate")
+    List<Presentation> findByDatePresentationBetweenWithDocuments(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
     // Recherche par sujet ou description (insensible à la casse)
     @Query("SELECT p FROM Presentation p WHERE LOWER(p.sujet) LIKE LOWER(CONCAT('%', :term, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%'))")
     List<Presentation> searchByTerm(@Param("term") String term);

@@ -51,7 +51,7 @@ public class Presentation {
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false)
     @NotNull(message = "Le statut est obligatoire")
-    private StatutPresentation statut = StatutPresentation.Planifié;
+    private StatutPresentation statut = StatutPresentation.Planifie;
 
     @Column(name = "fichier", columnDefinition = "TEXT")
     private String fichier;
@@ -69,7 +69,7 @@ public class Presentation {
     private List<Commentaire> commentaires;
 
     public enum StatutPresentation {
-        Planifié, Annulé, Confirmé, Terminé
+        Planifie, Annule, Confirmé, Termine
     }
 
     // Constructeurs

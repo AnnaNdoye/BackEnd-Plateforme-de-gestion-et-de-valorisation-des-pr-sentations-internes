@@ -16,7 +16,6 @@ public interface NotificationEmployeRepository extends JpaRepository<Notificatio
     
     @Query("SELECT ne FROM NotificationEmploye ne " +
            "LEFT JOIN FETCH ne.utilisateur u " +
-           "LEFT JOIN FETCH u.presentations " +
            "LEFT JOIN FETCH ne.notification n " +
            "WHERE ne.idUtilisateur = :idUtilisateur " +
            "ORDER BY ne.notification.dateDeReception DESC")
@@ -24,7 +23,6 @@ public interface NotificationEmployeRepository extends JpaRepository<Notificatio
 
     @Query("SELECT ne FROM NotificationEmploye ne " +
            "LEFT JOIN FETCH ne.utilisateur u " +
-           "LEFT JOIN FETCH u.presentations " +
            "LEFT JOIN FETCH ne.notification n " +
            "WHERE ne.idUtilisateur = :idUtilisateur AND ne.lue = false")
     List<NotificationEmploye> findUnreadByIdUtilisateur(@Param("idUtilisateur") Integer idUtilisateur);

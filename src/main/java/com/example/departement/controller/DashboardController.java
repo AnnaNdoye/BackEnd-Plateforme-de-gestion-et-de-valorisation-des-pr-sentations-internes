@@ -64,22 +64,22 @@ public class DashboardController {
             long annulees = 0;
             
             try {
-                List<Presentation> planifiesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Planifié);
+                List<Presentation> planifiesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Planifie);
                 planifiees = planifiesList.size();
                 logger.info("Présentations Planifiées: {}", planifiees);
-                
+
                 List<Presentation> confirmeesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Confirmé);
                 confirmees = confirmeesList.size();
                 logger.info("Présentations Confirmées: {}", confirmees);
-                
-                List<Presentation> termineesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Terminé);
+
+                List<Presentation> termineesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Termine);
                 terminees = termineesList.size();
                 logger.info("Présentations Terminées: {}", terminees);
-                
-                List<Presentation> annuleesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Annulé);
+
+                List<Presentation> annuleesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Annule);
                 annulees = annuleesList.size();
                 logger.info("Présentations Annulées: {}", annulees);
-                
+
             } catch (Exception e) {
                 logger.error("Erreur lors du comptage par statut: {}", e.getMessage(), e);
             }
@@ -99,12 +99,12 @@ public class DashboardController {
             try {
                 LocalDate today = LocalDate.now();
                 LocalDate futureDate = today.plusMonths(1);
-                upcomingPresentations = presentationRepository.findByDatePresentationBetween(today, futureDate);
+                upcomingPresentations = presentationRepository.findByDatePresentationBetweenWithDocuments(today, futureDate);
                 logger.info("Présentations à venir dans les 30 prochains jours: {}", upcomingPresentations.size());
-                
+
                 // Log détaillé des présentations à venir
                 for (Presentation p : upcomingPresentations) {
-                    logger.debug("Présentation à venir: ID={}, Sujet={}, Date={}, Statut={}", 
+                    logger.debug("Présentation à venir: ID={}, Sujet={}, Date={}, Statut={}",
                                p.getIdPresentation(), p.getSujet(), p.getDatePresentation(), p.getStatut());
                 }
             } catch (Exception e) {
