@@ -1,5 +1,6 @@
 package com.example.departement.controller;
 
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -65,7 +66,7 @@ public class DocumentController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Fichier non trouvé ou illisible"));
             }
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", e.getMessage()));
         }

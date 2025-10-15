@@ -40,6 +40,7 @@ public class PresentationController {
 
     // Créer une présentation
     @PostMapping("/create")
+    @SuppressWarnings("UseSpecificCatch")
     public ResponseEntity<?> createPresentation(
             @RequestParam("idUtilisateur") Integer idUtilisateur,
             @RequestParam("datePresentation") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate datePresentation,
@@ -139,6 +140,7 @@ public class PresentationController {
 
     // Mettre à jour une présentation
     @PutMapping("/{id}")
+    @SuppressWarnings("UseSpecificCatch")
     public ResponseEntity<?> updatePresentation(
             @PathVariable Integer id,
             @RequestParam("idUtilisateur") Integer idUtilisateur,
