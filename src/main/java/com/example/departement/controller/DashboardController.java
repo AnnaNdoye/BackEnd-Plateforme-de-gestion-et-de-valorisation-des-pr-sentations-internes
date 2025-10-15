@@ -41,13 +41,15 @@ public class DashboardController {
     @GetMapping("/stats")
     public ResponseEntity<?> getDashboardStats(@RequestHeader("Authorization") String token) {
         try {
-            logger.info("Récupération des stats du dashboard");
+            logger.info("=== DÉBUT RÉCUPÉRATION STATS DASHBOARD ===");
             
             String jwtToken = token.replace("Bearer ", "");
             String email = jwtUtils.getUsernameFromToken(jwtToken);
             Integer currentUserId = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"))
                 .getIdUtilisateur();
+
+            logger.info("Utilisateur ID: {}, Email: {}", currentUserId, email);
 
             Map<String, Object> stats = new HashMap<>();
 
@@ -57,20 +59,29 @@ public class DashboardController {
             
             logger.info("Total présentations: {}, Total utilisateurs: {}", totalPresentations, totalUsers);
 
-            // Présentations par statut
+            // Présentations par statut - CORRECTION
             long planifiees = 0;
             long confirmees = 0;
             long terminees = 0;
             long annulees = 0;
             
             try {
-                planifiees = presentationRepository.findByStatut(Presentation.StatutPresentation.Planifié).size();
-                confirmees = presentationRepository.findByStatut(Presentation.StatutPresentation.Confirmé).size();
-                terminees = presentationRepository.findByStatut(Presentation.StatutPresentation.Terminé).size();
-                annulees = presentationRepository.findByStatut(Presentation.StatutPresentation.Annulé).size();
+                List<Presentation> planifiesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Planifié);
+                planifiees = planifiesList.size();
+                logger.info("Présentations Planifiées: {}", planifiees);
                 
-                logger.info("Stats par statut - Planifiées: {}, Confirmées: {}, Terminées: {}, Annulées: {}", 
-                    planifiees, confirmees, terminees, annulees);
+                List<Presentation> confirmeesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Confirmé);
+                confirmees = confirmeesList.size();
+                logger.info("Présentations Confirmées: {}", confirmees);
+                
+                List<Presentation> termineesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Terminé);
+                terminees = termineesList.size();
+                logger.info("Présentations Terminées: {}", terminees);
+                
+                List<Presentation> annuleesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Annulé);
+                annulees = annuleesList.size();
+                logger.info("Présentations Annulées: {}", annulees);
+                
             } catch (Exception e) {
                 logger.error("Erreur lors du comptage par statut: {}", e.getMessage(), e);
             }
@@ -91,7 +102,13 @@ public class DashboardController {
                 LocalDate today = LocalDate.now();
                 LocalDate futureDate = today.plusMonths(1);
                 upcomingPresentations = presentationRepository.findByDatePresentationBetween(today, futureDate);
-                logger.info("Présentations à venir: {}", upcomingPresentations.size());
+                logger.info("Présentations à venir dans les 30 prochains jours: {}", upcomingPresentations.size());
+                
+                // Log détaillé des présentations à venir
+                for (Presentation p : upcomingPresentations) {
+                    logger.debug("Présentation à venir: ID={}, Sujet={}, Date={}, Statut={}", 
+                               p.getIdPresentation(), p.getSujet(), p.getDatePresentation(), p.getStatut());
+                }
             } catch (Exception e) {
                 logger.error("Erreur lors de la récupération des présentations à venir: {}", e.getMessage(), e);
                 upcomingPresentations = List.of();
@@ -108,11 +125,15 @@ public class DashboardController {
             stats.put("upcomingCount", upcomingPresentations.size());
             stats.put("upcomingPresentations", upcomingPresentations);
 
-            logger.info("Stats envoyées avec succès");
+            logger.info("=== STATS ENVOYÉES ===");
+            logger.info("Total: {}, Planifiées: {}, Confirmées: {}, Terminées: {}, Annulées: {}", 
+                       totalPresentations, planifiees, confirmees, terminees, annulees);
+            logger.info("=== FIN RÉCUPÉRATION STATS DASHBOARD ===");
+            
             return ResponseEntity.ok(stats);
             
         } catch (Exception e) {
-            logger.error("Erreur lors de la récupération des stats: {}", e.getMessage(), e);
+            logger.error("=== ERREUR DASHBOARD ===", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Erreur lors du chargement des statistiques: " + e.getMessage()));
         }
