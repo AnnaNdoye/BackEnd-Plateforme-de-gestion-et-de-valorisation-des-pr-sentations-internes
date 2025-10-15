@@ -75,6 +75,12 @@ public class NotificationService {
         try {
             logger.info("Récupération des notifications pour l'utilisateur ID: {}", idUtilisateur);
             List<NotificationEmploye> notifications = notificationEmployeRepository.findByIdUtilisateurOrderByDateDesc(idUtilisateur);
+            // Force initialization of lazy collections
+            for (NotificationEmploye ne : notifications) {
+                if (ne.getUtilisateur() != null) {
+                    ne.getUtilisateur().getPresentations().size();
+                }
+            }
             logger.info("Nombre de notifications trouvées: {}", notifications.size());
             return notifications;
         } catch (Exception e) {
@@ -88,6 +94,12 @@ public class NotificationService {
         try {
             logger.info("Récupération des notifications non lues pour l'utilisateur ID: {}", idUtilisateur);
             List<NotificationEmploye> notifications = notificationEmployeRepository.findUnreadByIdUtilisateur(idUtilisateur);
+            // Force initialization of lazy collections
+            for (NotificationEmploye ne : notifications) {
+                if (ne.getUtilisateur() != null) {
+                    ne.getUtilisateur().getPresentations().size();
+                }
+            }
             logger.info("Nombre de notifications non lues: {}", notifications.size());
             return notifications;
         } catch (Exception e) {
