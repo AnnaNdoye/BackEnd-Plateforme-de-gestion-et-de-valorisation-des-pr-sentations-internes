@@ -1,11 +1,26 @@
 package com.example.departement.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "presentations")
@@ -24,14 +39,6 @@ public class Presentation {
     @Column(name = "date_presentation", nullable = false)
     @NotNull(message = "La date de présentation est obligatoire")
     private LocalDate datePresentation;
-
-    @Column(name = "heure_debut", nullable = false)
-    @NotNull(message = "L'heure de début est obligatoire")
-    private LocalDateTime heureDebut;
-
-    @Column(name = "heure_fin", nullable = false)
-    @NotNull(message = "L'heure de fin est obligatoire")
-    private LocalDateTime heureFin;
 
     @Column(name = "sujet", nullable = false)
     @NotBlank(message = "Le sujet est obligatoire")
@@ -68,7 +75,7 @@ public class Presentation {
     // Constructeurs
     public Presentation() {}
 
-    // Getters et Setters complets
+    // Getters et Setters
     public Integer getIdPresentation() { return idPresentation; }
     public void setIdPresentation(Integer idPresentation) { this.idPresentation = idPresentation; }
     
@@ -77,12 +84,6 @@ public class Presentation {
     
     public LocalDate getDatePresentation() { return datePresentation; }
     public void setDatePresentation(LocalDate datePresentation) { this.datePresentation = datePresentation; }
-    
-    public LocalDateTime getHeureDebut() { return heureDebut; }
-    public void setHeureDebut(LocalDateTime heureDebut) { this.heureDebut = heureDebut; }
-    
-    public LocalDateTime getHeureFin() { return heureFin; }
-    public void setHeureFin(LocalDateTime heureFin) { this.heureFin = heureFin; }
     
     public String getSujet() { return sujet; }
     public void setSujet(String sujet) { this.sujet = sujet; }

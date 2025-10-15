@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,7 +49,6 @@ public class PresentationService {
 
     // Créer une présentation
     public Presentation createPresentation(Integer idUtilisateur, LocalDate datePresentation, 
-                                          LocalDateTime heureDebut, LocalDateTime heureFin, 
                                           String sujet, String description, 
                                           Presentation.StatutPresentation statut, 
                                           MultipartFile[] fichiers) throws IOException {
@@ -58,16 +56,9 @@ public class PresentationService {
         Utilisateur utilisateur = utilisateurRepository.findById(idUtilisateur)
             .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + idUtilisateur));
 
-        // Validation des heures
-        if (heureDebut.isAfter(heureFin)) {
-            throw new RuntimeException("L'heure de début doit être avant l'heure de fin");
-        }
-
         Presentation presentation = new Presentation();
         presentation.setUtilisateur(utilisateur);
         presentation.setDatePresentation(datePresentation);
-        presentation.setHeureDebut(heureDebut);
-        presentation.setHeureFin(heureFin);
         presentation.setSujet(sujet);
         presentation.setDescription(description);
         presentation.setStatut(statut);
@@ -127,8 +118,7 @@ public class PresentationService {
 
     // Mettre à jour une présentation
     public Presentation updatePresentation(Integer id, Integer idUtilisateur, 
-                                          LocalDate datePresentation, LocalDateTime heureDebut, 
-                                          LocalDateTime heureFin, String sujet, 
+                                          LocalDate datePresentation, String sujet, 
                                           String description, Presentation.StatutPresentation statut, 
                                           MultipartFile[] fichiers) throws IOException {
         
@@ -140,14 +130,7 @@ public class PresentationService {
             throw new RuntimeException("Vous n'êtes pas autorisé à modifier cette présentation");
         }
 
-        // Validation des heures
-        if (heureDebut.isAfter(heureFin)) {
-            throw new RuntimeException("L'heure de début doit être avant l'heure de fin");
-        }
-
         presentation.setDatePresentation(datePresentation);
-        presentation.setHeureDebut(heureDebut);
-        presentation.setHeureFin(heureFin);
         presentation.setSujet(sujet);
         presentation.setDescription(description);
         presentation.setStatut(statut);
@@ -206,7 +189,6 @@ public class PresentationService {
                     Path filePath = Paths.get(uploadDir, "presentations", file.trim());
                     Files.deleteIfExists(filePath);
                 } catch (IOException e) {
-                    // Log l'erreur mais continue
                     System.err.println("Erreur lors de la suppression du fichier: " + file);
                 }
             }
