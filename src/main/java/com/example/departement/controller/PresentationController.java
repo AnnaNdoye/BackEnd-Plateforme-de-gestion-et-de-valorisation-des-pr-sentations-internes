@@ -119,6 +119,7 @@ public class PresentationController {
     }
 
     // Obtenir une présentation par ID
+    // ID va être récupéré
     @GetMapping("/{id}")
     public ResponseEntity<?> getPresentationById(@PathVariable Integer id) {
         try {
