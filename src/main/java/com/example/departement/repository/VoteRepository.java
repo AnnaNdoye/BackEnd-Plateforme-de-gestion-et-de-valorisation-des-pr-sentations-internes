@@ -12,7 +12,8 @@ import com.example.departement.entity.Vote;
 
 @Repository
 public interface VoteRepository extends JpaRepository<Vote, Integer> {
-    List<Vote> findByPresentationIdPresentation(Integer idPresentation);
+    @Query("SELECT v FROM Vote v JOIN FETCH v.presentation p JOIN FETCH p.utilisateur JOIN FETCH v.utilisateur WHERE v.presentation.idPresentation = :idPresentation")
+    List<Vote> findByPresentationIdPresentation(@Param("idPresentation") Integer idPresentation);
     Optional<Vote> findByPresentationIdPresentationAndUtilisateurIdUtilisateur(
         Integer idPresentation, Integer idUtilisateur);
     

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.departement.entity.Vote;
+import com.example.departement.dto.VoteDTO;
 import com.example.departement.service.VoteService;
 import com.example.departement.util.JwtUtils;
 
@@ -45,7 +45,7 @@ public class VoteController {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"))
                 .getIdUtilisateur();
 
-            Vote vote = voteService.addOrUpdateVote(idPresentation, currentUserId, note);
+            VoteDTO vote = voteService.addOrUpdateVote(idPresentation, currentUserId, note);
             return ResponseEntity.ok(vote);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -55,9 +55,9 @@ public class VoteController {
 
     // Obtenir tous les votes d'une présentation
     @GetMapping("/presentation/{idPresentation}")
-    public ResponseEntity<List<Vote>> getVotesByPresentation(@PathVariable Integer idPresentation) {
+    public ResponseEntity<List<VoteDTO>> getVotesByPresentation(@PathVariable Integer idPresentation) {
         try {
-            List<Vote> votes = voteService.getVotesByPresentation(idPresentation);
+            List<VoteDTO> votes = voteService.getVotesByPresentation(idPresentation);
             return ResponseEntity.ok(votes);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

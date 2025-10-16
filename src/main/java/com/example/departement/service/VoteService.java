@@ -1,12 +1,20 @@
 package com.example.departement.service;
 
-import com.example.departement.entity.*;
-import com.example.departement.repository.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
+
+import com.example.departement.dto.VoteDTO;
+import com.example.departement.entity.Presentation;
+import com.example.departement.entity.Utilisateur;
+import com.example.departement.entity.Vote;
+import com.example.departement.repository.PresentationRepository;
+import com.example.departement.repository.UtilisateurRepository;
+import com.example.departement.repository.VoteRepository;
 
 @Service
 @Transactional
@@ -22,7 +30,7 @@ public class VoteService {
     private UtilisateurRepository utilisateurRepository;
 
     // Ajouter ou mettre à jour un vote
-    public Vote addOrUpdateVote(Integer idPresentation, Integer idUtilisateur, Integer note) {
+    public VoteDTO addOrUpdateVote(Integer idPresentation, Integer idUtilisateur, Integer note) {
         if (note < 1 || note > 5) {
             throw new RuntimeException("La note doit être entre 1 et 5");
         }
@@ -50,12 +58,16 @@ public class VoteService {
             vote.setNote(note);
         }
 
-        return voteRepository.save(vote);
+        Vote savedVote = voteRepository.save(vote);
+        return new VoteDTO(savedVote);
     }
 
     // Obtenir tous les votes d'une présentation
-    public List<Vote> getVotesByPresentation(Integer idPresentation) {
-        return voteRepository.findByPresentationIdPresentation(idPresentation);
+    public List<VoteDTO> getVotesByPresentation(Integer idPresentation) {
+        List<Vote> votes = voteRepository.findByPresentationIdPresentation(idPresentation);
+        return votes.stream()
+            .map(VoteDTO::new)
+            .collect(Collectors.toList());
     }
 
     // Obtenir le vote d'un utilisateur pour une présentation
