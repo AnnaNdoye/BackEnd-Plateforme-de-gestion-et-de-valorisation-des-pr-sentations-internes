@@ -35,7 +35,6 @@ public class DashboardController {
     @Autowired
     private JwtUtils jwtUtils;
 
-    // Obtenir les statistiques du dashboard
     @GetMapping("/stats")
     public ResponseEntity<?> getDashboardStats(@RequestHeader("Authorization") String token) {
         try {
@@ -57,7 +56,7 @@ public class DashboardController {
             
             logger.info("Total présentations: {}, Total utilisateurs: {}", totalPresentations, totalUsers);
 
-            // Présentations par statut - CORRECTION
+            // CORRECTION : Utiliser les statuts sans accents
             long planifiees = 0;
             long confirmees = 0;
             long terminees = 0;
@@ -68,7 +67,7 @@ public class DashboardController {
                 planifiees = planifiesList.size();
                 logger.info("Présentations Planifiées: {}", planifiees);
 
-                List<Presentation> confirmeesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Confirmé);
+                List<Presentation> confirmeesList = presentationRepository.findByStatut(Presentation.StatutPresentation.Confirme);
                 confirmees = confirmeesList.size();
                 logger.info("Présentations Confirmées: {}", confirmees);
 
@@ -102,7 +101,6 @@ public class DashboardController {
                 upcomingPresentations = presentationRepository.findByDatePresentationBetweenWithDocuments(today, futureDate);
                 logger.info("Présentations à venir dans les 30 prochains jours: {}", upcomingPresentations.size());
 
-                // Log détaillé des présentations à venir
                 for (Presentation p : upcomingPresentations) {
                     logger.debug("Présentation à venir: ID={}, Sujet={}, Date={}, Statut={}",
                                p.getIdPresentation(), p.getSujet(), p.getDatePresentation(), p.getStatut());

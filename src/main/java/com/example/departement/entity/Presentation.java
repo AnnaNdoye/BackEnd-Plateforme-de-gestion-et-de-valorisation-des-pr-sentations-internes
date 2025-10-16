@@ -68,8 +68,9 @@ public class Presentation {
     @JsonIgnoreProperties("presentation")
     private List<Commentaire> commentaires;
 
+    // *** CORRECTION : Tous les statuts SANS accents ***
     public enum StatutPresentation {
-        Planifie, Annule, Confirmé, Termine
+        Planifie, Annule, Confirme, Termine
     }
 
     // Constructeurs
