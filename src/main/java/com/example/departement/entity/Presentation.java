@@ -1,6 +1,7 @@
 package com.example.departement.entity;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +42,12 @@ public class Presentation {
     @Column(name = "date_presentation", nullable = false)
     @NotNull(message = "La date de présentation est obligatoire")
     private LocalDate datePresentation;
+
+    @Column(name = "heure_debut")
+    private LocalTime heureDebut;
+
+    @Column(name = "heure_fin")
+    private LocalTime heureFin;
 
     @Column(name = "sujet", nullable = false)
     @NotBlank(message = "Le sujet est obligatoire")
@@ -89,7 +96,13 @@ public class Presentation {
     
     public LocalDate getDatePresentation() { return datePresentation; }
     public void setDatePresentation(LocalDate datePresentation) { this.datePresentation = datePresentation; }
-    
+
+    public LocalTime getHeureDebut() { return heureDebut; }
+    public void setHeureDebut(LocalTime heureDebut) { this.heureDebut = heureDebut; }
+
+    public LocalTime getHeureFin() { return heureFin; }
+    public void setHeureFin(LocalTime heureFin) { this.heureFin = heureFin; }
+
     public String getSujet() { return sujet; }
     public void setSujet(String sujet) { this.sujet = sujet; }
     

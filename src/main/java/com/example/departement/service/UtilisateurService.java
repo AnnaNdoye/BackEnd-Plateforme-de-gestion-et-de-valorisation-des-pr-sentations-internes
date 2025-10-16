@@ -65,6 +65,7 @@ public class UtilisateurService {
             utilisateur.getEmail(),
             utilisateur.getPoste(),
             utilisateur.getMatricule(),
+            utilisateur.getDepartement(),
             utilisateur.getPhotoDeProfil(),
             utilisateur.getDateInscription()
         );
@@ -95,6 +96,7 @@ public class UtilisateurService {
             utilisateur.getEmail(),
             utilisateur.getPoste(),
             utilisateur.getMatricule(),
+            utilisateur.getDepartement(),
             utilisateur.getPhotoDeProfil(),
             utilisateur.getDateInscription()
         );
@@ -112,6 +114,7 @@ public class UtilisateurService {
             utilisateur.getEmail(),
             utilisateur.getPoste(),
             utilisateur.getMatricule(),
+            utilisateur.getDepartement(),
             utilisateur.getPhotoDeProfil(),
             utilisateur.getDateInscription()
         );
@@ -173,6 +176,7 @@ public class UtilisateurService {
             utilisateur.getEmail(),
             utilisateur.getPoste(),
             utilisateur.getMatricule(),
+            utilisateur.getDepartement(),
             utilisateur.getPhotoDeProfil(),
             utilisateur.getDateInscription()
         );

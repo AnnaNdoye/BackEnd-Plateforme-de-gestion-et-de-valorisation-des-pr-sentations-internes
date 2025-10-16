@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,9 +54,10 @@ public class PresentationService {
     private String uploadDir;
 
     // Créer une présentation
-    public Presentation createPresentation(Integer idUtilisateur, LocalDate datePresentation, 
-                                          String sujet, String description, 
-                                          Presentation.StatutPresentation statut, 
+    public Presentation createPresentation(Integer idUtilisateur, LocalDate datePresentation,
+                                          LocalTime heureDebut, LocalTime heureFin,
+                                          String sujet, String description,
+                                          Presentation.StatutPresentation statut,
                                           MultipartFile[] fichiers) throws IOException {
         
         logger.info("=== CRÉATION PRÉSENTATION ===");
@@ -67,6 +69,8 @@ public class PresentationService {
         Presentation presentation = new Presentation();
         presentation.setUtilisateur(utilisateur);
         presentation.setDatePresentation(datePresentation);
+        presentation.setHeureDebut(heureDebut);
+        presentation.setHeureFin(heureFin);
         presentation.setSujet(sujet);
         presentation.setDescription(description);
         presentation.setStatut(statut);
@@ -191,9 +195,9 @@ public class PresentationService {
     }
 
     // Mettre à jour une présentation
-    public Presentation updatePresentation(Integer id, Integer idUtilisateur, 
-                                          LocalDate datePresentation, String sujet, 
-                                          String description, Presentation.StatutPresentation statut, 
+    public Presentation updatePresentation(Integer id, Integer idUtilisateur,
+                                          LocalDate datePresentation, LocalTime heureDebut, LocalTime heureFin,
+                                          String sujet, String description, Presentation.StatutPresentation statut,
                                           MultipartFile[] fichiers) throws IOException {
         
         logger.info("=== MISE À JOUR PRÉSENTATION ID: {} ===", id);
@@ -207,6 +211,8 @@ public class PresentationService {
         }
 
         presentation.setDatePresentation(datePresentation);
+        presentation.setHeureDebut(heureDebut);
+        presentation.setHeureFin(heureFin);
         presentation.setSujet(sujet);
         presentation.setDescription(description);
         presentation.setStatut(statut);

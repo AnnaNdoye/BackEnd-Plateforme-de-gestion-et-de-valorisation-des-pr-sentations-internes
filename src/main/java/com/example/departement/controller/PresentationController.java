@@ -1,6 +1,7 @@
 package com.example.departement.controller;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,8 @@ public class PresentationController {
     public ResponseEntity<?> createPresentation(
             @RequestParam("idUtilisateur") Integer idUtilisateur,
             @RequestParam("datePresentation") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate datePresentation,
+            @RequestParam(value = "heureDebut", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureDebut,
+            @RequestParam(value = "heureFin", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureFin,
             @RequestParam("sujet") String sujet,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("statut") String statutStr,
@@ -89,7 +92,7 @@ public class PresentationController {
 
             // Création de la présentation
             Presentation presentation = presentationService.createPresentation(
-                idUtilisateur, datePresentation, sujet, description, statut, fichiers);
+                idUtilisateur, datePresentation, heureDebut, heureFin, sujet, description, statut, fichiers);
             
             logger.info("Présentation créée avec succès - ID: {}", presentation.getIdPresentation());
             logger.info("=== FIN CRÉATION PRÉSENTATION ===");
@@ -204,6 +207,8 @@ public class PresentationController {
             @PathVariable Integer id,
             @RequestParam("idUtilisateur") Integer idUtilisateur,
             @RequestParam("datePresentation") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate datePresentation,
+            @RequestParam(value = "heureDebut", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureDebut,
+            @RequestParam(value = "heureFin", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureFin,
             @RequestParam("sujet") String sujet,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("statut") String statutStr,
@@ -228,7 +233,7 @@ public class PresentationController {
             Presentation.StatutPresentation statut = Presentation.StatutPresentation.valueOf(statutStr);
 
             Presentation presentation = presentationService.updatePresentation(
-                id, idUtilisateur, datePresentation, sujet, description, statut, fichiers);
+                id, idUtilisateur, datePresentation, heureDebut, heureFin, sujet, description, statut, fichiers);
             
             logger.info("Présentation mise à jour avec succès");
             logger.info("=== FIN MISE À JOUR PRÉSENTATION ===");
