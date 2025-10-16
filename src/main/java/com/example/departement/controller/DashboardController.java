@@ -97,7 +97,7 @@ public class DashboardController {
             List<Presentation> upcomingPresentations = null;
             try {
                 LocalDate today = LocalDate.now();
-                LocalDate futureDate = today.plusMonths(1);
+                LocalDate futureDate = today.plusDays(30);
                 upcomingPresentations = presentationRepository.findByDatePresentationBetweenWithDocuments(today, futureDate);
                 logger.info("Présentations à venir dans les 30 prochains jours: {}", upcomingPresentations.size());
 
