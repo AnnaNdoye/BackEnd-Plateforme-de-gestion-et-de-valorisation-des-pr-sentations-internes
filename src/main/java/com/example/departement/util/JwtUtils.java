@@ -75,7 +75,7 @@ public class JwtUtils {
             String email = claims.getSubject();
             // Pour obtenir l'ID, on doit faire une requête DB, mais pour simplifier, on utilise le service
             // Ici, on retourne null et on gère différemment dans le controller
-            return null; // TODO: Implémenter correctement
+            return null; 
         } catch (Exception e) {
             System.err.println("Error extracting user ID from token: " + e.getMessage());
             return null;

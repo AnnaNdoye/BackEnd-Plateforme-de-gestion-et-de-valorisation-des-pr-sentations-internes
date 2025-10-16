@@ -13,12 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.departement.dto.PresentationDTO;
 import com.example.departement.entity.Document;
 import com.example.departement.entity.Notification;
 import com.example.departement.entity.Presentation;
@@ -29,8 +32,10 @@ import com.example.departement.repository.PresentationRepository;
 import com.example.departement.repository.UtilisateurRepository;
 
 @Service
-@Transactional
+@Transactional // CORRECTION : Ajouter @Transactional au niveau de la classe
 public class PresentationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PresentationService.class);
 
     @Autowired
     private PresentationRepository presentationRepository;
@@ -53,6 +58,9 @@ public class PresentationService {
                                           Presentation.StatutPresentation statut, 
                                           MultipartFile[] fichiers) throws IOException {
         
+        logger.info("=== CRÉATION PRÉSENTATION ===");
+        logger.info("User ID: {}, Sujet: {}, Date: {}, Statut: {}", idUtilisateur, sujet, datePresentation, statut);
+        
         Utilisateur utilisateur = utilisateurRepository.findById(idUtilisateur)
             .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + idUtilisateur));
 
@@ -65,6 +73,7 @@ public class PresentationService {
 
         // Sauvegarder d'abord la présentation
         presentation = presentationRepository.save(presentation);
+        logger.info("Présentation sauvegardée avec ID: {}", presentation.getIdPresentation());
 
         // Gérer les fichiers
         if (fichiers != null && fichiers.length > 0) {
@@ -79,6 +88,7 @@ public class PresentationService {
                 document.setChemin("uploads/presentations/" + fileName);
                 documentRepository.save(document);
             }
+            logger.info("Fichiers sauvegardés: {}", savedFiles.size());
         }
 
         presentation = presentationRepository.save(presentation);
@@ -88,32 +98,96 @@ public class PresentationService {
             sujet, utilisateur.getPrenom(), utilisateur.getNom(), datePresentation.toString());
         notificationService.createNotificationForAll(message, Notification.TypeAction.AJOUT, presentation.getIdPresentation());
 
+        logger.info("=== PRÉSENTATION CRÉÉE AVEC SUCCÈS ===");
         return presentation;
     }
 
-    // Obtenir toutes les présentations
-    public List<Presentation> getAllPresentations() {
-        return presentationRepository.findAllByOrderByDatePresentationDesc();
+    // CORRECTION : Utiliser une query sans JOIN FETCH pour éviter MultipleBagFetchException
+    @Transactional(readOnly = true)
+    public List<PresentationDTO> getAllPresentations() {
+        logger.info("=== RÉCUPÉRATION TOUTES LES PRÉSENTATIONS ===");
+        List<Presentation> presentations = presentationRepository.findAllWithDetails();
+        logger.info("Nombre de présentations: {}", presentations.size());
+
+        // Initialiser explicitement les collections une par une pour éviter MultipleBagFetchException
+        presentations.forEach(p -> {
+            // Charger les documents
+            p.getDocuments().size();
+            // Charger les votes
+            p.getVotes().size();
+            // Charger les commentaires
+            p.getCommentaires().size();
+        });
+
+        // Convertir en DTOs
+        return presentations.stream()
+            .map(PresentationDTO::new)
+            .collect(java.util.stream.Collectors.toList());
     }
 
-    // Obtenir une présentation par ID
-    public Optional<Presentation> getPresentationById(Integer id) {
-        return presentationRepository.findById(id);
+    // CORRECTION : Ajouter readOnly pour les lectures
+    @Transactional(readOnly = true)
+    public Optional<PresentationDTO> getPresentationById(Integer id) {
+        logger.info("Récupération présentation ID: {}", id);
+        Optional<Presentation> presentation = presentationRepository.findByIdWithDetails(id);
+
+        // Initialiser les collections une par une
+        presentation.ifPresent(p -> {
+            // Charger les documents
+            p.getDocuments().size();
+            // Charger les votes
+            p.getVotes().size();
+            // Charger les commentaires
+            p.getCommentaires().size();
+        });
+
+        return presentation.map(PresentationDTO::new);
     }
 
-    // Obtenir les présentations d'un utilisateur
-    public List<Presentation> getPresentationsByUtilisateur(Integer idUtilisateur) {
-        return presentationRepository.findByUtilisateurIdUtilisateur(idUtilisateur);
+    @Transactional(readOnly = true)
+    public List<PresentationDTO> getPresentationsByUtilisateur(Integer idUtilisateur) {
+        logger.info("Récupération présentations utilisateur ID: {}", idUtilisateur);
+        List<Presentation> presentations = presentationRepository.findByUtilisateurIdUtilisateurWithDetails(idUtilisateur);
+
+        // Initialiser les collections une par une
+        presentations.forEach(p -> {
+            // Charger les documents
+            p.getDocuments().size();
+            // Charger les votes
+            p.getVotes().size();
+            // Charger les commentaires
+            p.getCommentaires().size();
+        });
+
+        return presentations.stream()
+            .map(PresentationDTO::new)
+            .collect(java.util.stream.Collectors.toList());
     }
 
-    // Obtenir les présentations par statut
-    public List<Presentation> getPresentationsByStatut(Presentation.StatutPresentation statut) {
-        return presentationRepository.findByStatut(statut);
+    @Transactional(readOnly = true)
+    public List<PresentationDTO> getPresentationsByStatut(Presentation.StatutPresentation statut) {
+        logger.info("Récupération présentations statut: {}", statut);
+        List<Presentation> presentations = presentationRepository.findByStatutWithDetails(statut);
+
+        // Initialiser les collections une par une
+        presentations.forEach(p -> {
+            // Charger les documents
+            p.getDocuments().size();
+            // Charger les votes
+            p.getVotes().size();
+            // Charger les commentaires
+            p.getCommentaires().size();
+        });
+
+        return presentations.stream()
+            .map(PresentationDTO::new)
+            .collect(java.util.stream.Collectors.toList());
     }
 
-    // Obtenir les présentations par période
+    @Transactional(readOnly = true)
     public List<Presentation> getPresentationsByPeriod(LocalDate startDate, LocalDate endDate) {
-        return presentationRepository.findByDatePresentationBetween(startDate, endDate);
+        logger.info("Récupération présentations période: {} - {}", startDate, endDate);
+        return presentationRepository.findByDatePresentationBetweenWithDocuments(startDate, endDate);
     }
 
     // Mettre à jour une présentation
@@ -121,6 +195,8 @@ public class PresentationService {
                                           LocalDate datePresentation, String sujet, 
                                           String description, Presentation.StatutPresentation statut, 
                                           MultipartFile[] fichiers) throws IOException {
+        
+        logger.info("=== MISE À JOUR PRÉSENTATION ID: {} ===", id);
         
         Presentation presentation = presentationRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Présentation non trouvée avec l'ID: " + id));
@@ -165,11 +241,14 @@ public class PresentationService {
             sujet, presentation.getUtilisateur().getPrenom(), presentation.getUtilisateur().getNom());
         notificationService.createNotificationForAll(message, Notification.TypeAction.MODIFICATION, presentation.getIdPresentation());
 
+        logger.info("=== PRÉSENTATION MISE À JOUR ===");
         return presentation;
     }
 
     // Supprimer une présentation
     public void deletePresentation(Integer id, Integer idUtilisateur) {
+        logger.info("=== SUPPRESSION PRÉSENTATION ID: {} ===", id);
+        
         Presentation presentation = presentationRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Présentation non trouvée avec l'ID: " + id));
 
@@ -189,7 +268,7 @@ public class PresentationService {
                     Path filePath = Paths.get(uploadDir, "presentations", file.trim());
                     Files.deleteIfExists(filePath);
                 } catch (IOException e) {
-                    System.err.println("Erreur lors de la suppression du fichier: " + file);
+                    logger.error("Erreur suppression fichier: {}", file, e);
                 }
             }
         }
@@ -199,25 +278,50 @@ public class PresentationService {
         // Créer une notification de suppression
         String message = String.format("Présentation supprimée: '%s' par %s", sujet, nomComplet);
         notificationService.createNotificationForAll(message, Notification.TypeAction.SUPPRESSION, null);
+
+        logger.info("=== PRÉSENTATION SUPPRIMÉE ===");
     }
 
-    // Rechercher des présentations
-    public List<Presentation> searchPresentations(String term) {
+    @Transactional(readOnly = true)
+    public List<PresentationDTO> searchPresentations(String term) {
         if (term == null || term.trim().isEmpty()) {
             return getAllPresentations();
         }
-        return presentationRepository.searchByTerm(term.trim());
+        logger.info("Recherche: {}", term);
+        List<Presentation> results = presentationRepository.searchByTermWithDetails(term.trim());
+
+        // Initialiser les collections une par une
+        results.forEach(p -> {
+            // Charger les documents
+            p.getDocuments().size();
+            // Charger les votes
+            p.getVotes().size();
+            // Charger les commentaires
+            p.getCommentaires().size();
+        });
+
+        return results.stream()
+            .map(PresentationDTO::new)
+            .collect(java.util.stream.Collectors.toList());
     }
 
-    // Obtenir les statistiques d'une présentation
+    @Transactional(readOnly = true)
     public Map<String, Object> getPresentationStats(Integer idPresentation) {
         Presentation presentation = presentationRepository.findById(idPresentation)
             .orElseThrow(() -> new RuntimeException("Présentation non trouvée"));
 
+        // Initialiser les collections une par une
+        // Charger les documents
+        presentation.getDocuments().size();
+        // Charger les votes
+        presentation.getVotes().size();
+        // Charger les commentaires
+        presentation.getCommentaires().size();
+
         Map<String, Object> stats = new HashMap<>();
         stats.put("nombreVotes", presentation.getVotes().size());
         stats.put("nombreCommentaires", presentation.getCommentaires().size());
-        
+
         // Calculer la moyenne des notes
         if (!presentation.getVotes().isEmpty()) {
             double moyenne = presentation.getVotes().stream()

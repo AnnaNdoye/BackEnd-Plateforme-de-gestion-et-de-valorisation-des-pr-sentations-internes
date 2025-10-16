@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.departement.dto.PresentationDTO;
 import com.example.departement.entity.Presentation;
 import com.example.departement.service.PresentationService;
 import com.example.departement.util.JwtUtils;
@@ -107,7 +108,7 @@ public class PresentationController {
     public ResponseEntity<?> getAllPresentations() {
         try {
             logger.info("Récupération de toutes les présentations");
-            List<Presentation> presentations = presentationService.getAllPresentations();
+            List<PresentationDTO> presentations = presentationService.getAllPresentations();
             logger.info("Nombre de présentations trouvées: {}", presentations.size());
             return ResponseEntity.ok(presentations);
         } catch (Exception e) {
@@ -149,7 +150,7 @@ public class PresentationController {
                 .getIdUtilisateur();
 
             logger.info("Récupération des présentations de l'utilisateur ID: {}", currentUserId);
-            List<Presentation> presentations = presentationService.getPresentationsByUtilisateur(currentUserId);
+            List<PresentationDTO> presentations = presentationService.getPresentationsByUtilisateur(currentUserId);
             logger.info("Nombre de présentations trouvées: {}", presentations.size());
             return ResponseEntity.ok(presentations);
         } catch (Exception e) {
@@ -165,7 +166,7 @@ public class PresentationController {
         try {
             logger.info("Récupération des présentations avec statut: {}", statut);
             Presentation.StatutPresentation statutEnum = Presentation.StatutPresentation.valueOf(statut);
-            List<Presentation> presentations = presentationService.getPresentationsByStatut(statutEnum);
+            List<PresentationDTO> presentations = presentationService.getPresentationsByStatut(statutEnum);
             logger.info("Nombre de présentations trouvées: {}", presentations.size());
             return ResponseEntity.ok(presentations);
         } catch (IllegalArgumentException e) {
@@ -270,7 +271,7 @@ public class PresentationController {
     public ResponseEntity<?> searchPresentations(@RequestParam("term") String term) {
         try {
             logger.info("Recherche de présentations avec le terme: {}", term);
-            List<Presentation> presentations = presentationService.searchPresentations(term);
+            List<PresentationDTO> presentations = presentationService.searchPresentations(term);
             logger.info("Nombre de résultats: {}", presentations.size());
             return ResponseEntity.ok(presentations);
         } catch (Exception e) {

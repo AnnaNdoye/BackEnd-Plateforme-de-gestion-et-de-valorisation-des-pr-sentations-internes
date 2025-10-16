@@ -1,6 +1,7 @@
 package com.example.departement.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -31,6 +32,7 @@ public class Presentation {
     @Column(name = "id_presentation")
     private Integer idPresentation;
 
+    // CORRECTION : EAGER fetch pour l'utilisateur car toujours nécessaire
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_utilisateur", nullable = false)
     @JsonIgnoreProperties({"presentations", "votes", "commentaires", "motDePasse"})
@@ -56,19 +58,21 @@ public class Presentation {
     @Column(name = "fichier", columnDefinition = "TEXT")
     private String fichier;
 
-    @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("presentation")
-    private List<Document> documents;
+    // CORRECTION : Initialiser les collections pour éviter NullPointerException
+    // LAZY est OK car on utilise JOIN FETCH dans les queries
+    @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"presentation", "hibernateLazyInitializer", "handler"})
+    private List<Document> documents = new ArrayList<>();
 
-    @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("presentation")
-    private List<Vote> votes;
+    @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"presentation", "hibernateLazyInitializer", "handler"})
+    private List<Vote> votes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("presentation")
-    private List<Commentaire> commentaires;
+    @OneToMany(mappedBy = "presentation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"presentation", "hibernateLazyInitializer", "handler"})
+    private List<Commentaire> commentaires = new ArrayList<>();
 
-    // *** CORRECTION : Tous les statuts SANS accents ***
+    // Enum des statuts SANS accents
     public enum StatutPresentation {
         Planifie, Annule, Confirme, Termine
     }
