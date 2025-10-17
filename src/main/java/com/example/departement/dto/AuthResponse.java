@@ -12,7 +12,7 @@ public class AuthResponse {
     private String matricule;
     private String departement;
     private String photoDeProfil;
-    private LocalDateTime dateInscription;
+    private String dateInscription;
 
     public AuthResponse(String token, Integer idUtilisateur, String nom, String prenom, String email, String poste, String matricule, String departement, String photoDeProfil, LocalDateTime dateInscription) {
         this.token = token;
@@ -24,7 +24,7 @@ public class AuthResponse {
         this.matricule = matricule;
         this.departement = departement;
         this.photoDeProfil = photoDeProfil;
-        this.dateInscription = dateInscription;
+        this.dateInscription = dateInscription != null ? dateInscription.toString() : null;
     }
 
     // Getters and setters
@@ -55,6 +55,6 @@ public class AuthResponse {
     public String getPhotoDeProfil() { return photoDeProfil; }
     public void setPhotoDeProfil(String photoDeProfil) { this.photoDeProfil = photoDeProfil; }
 
-    public LocalDateTime getDateInscription() { return dateInscription; }
-    public void setDateInscription(LocalDateTime dateInscription) { this.dateInscription = dateInscription; }
+    public String getDateInscription() { return dateInscription; }
+    public void setDateInscription(String dateInscription) { this.dateInscription = dateInscription; }
 }

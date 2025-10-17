@@ -1,6 +1,7 @@
 package com.example.departement.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,7 +13,10 @@ public class PresentationDTO {
     private String nomUtilisateur;
     private String prenomUtilisateur;
     private String emailUtilisateur;
+    private String departementUtilisateur;
     private LocalDate datePresentation;
+    private LocalTime heureDebut;
+    private LocalTime heureFin;
     private String sujet;
     private String description;
     private String statut;
@@ -31,7 +35,10 @@ public class PresentationDTO {
         this.nomUtilisateur = presentation.getUtilisateur().getNom();
         this.prenomUtilisateur = presentation.getUtilisateur().getPrenom();
         this.emailUtilisateur = presentation.getUtilisateur().getEmail();
+        this.departementUtilisateur = presentation.getUtilisateur().getDepartement();
         this.datePresentation = presentation.getDatePresentation();
+        this.heureDebut = presentation.getHeureDebut();
+        this.heureFin = presentation.getHeureFin();
         this.sujet = presentation.getSujet();
         this.description = presentation.getDescription();
         this.statut = presentation.getStatut().toString();
@@ -67,8 +74,17 @@ public class PresentationDTO {
     public String getEmailUtilisateur() { return emailUtilisateur; }
     public void setEmailUtilisateur(String emailUtilisateur) { this.emailUtilisateur = emailUtilisateur; }
 
+    public String getDepartementUtilisateur() { return departementUtilisateur; }
+    public void setDepartementUtilisateur(String departementUtilisateur) { this.departementUtilisateur = departementUtilisateur; }
+
     public LocalDate getDatePresentation() { return datePresentation; }
     public void setDatePresentation(LocalDate datePresentation) { this.datePresentation = datePresentation; }
+
+    public LocalTime getHeureDebut() { return heureDebut; }
+    public void setHeureDebut(LocalTime heureDebut) { this.heureDebut = heureDebut; }
+
+    public LocalTime getHeureFin() { return heureFin; }
+    public void setHeureFin(LocalTime heureFin) { this.heureFin = heureFin; }
 
     public String getSujet() { return sujet; }
     public void setSujet(String sujet) { this.sujet = sujet; }
